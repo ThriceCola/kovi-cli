@@ -19,5 +19,5 @@ serde_json = "1.0"
 
 
 [[bin]]
-name = "kovi"
+name = "cargo-kovi"
 path = "src/main.rs"

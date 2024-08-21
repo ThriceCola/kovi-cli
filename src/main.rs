@@ -4,7 +4,7 @@ use cmd::{add::add, new_kovi::new_kovi, new_plugin::new_plugin};
 mod cmd;
 
 #[derive(Parser, Debug)]
-#[command(version, long_about = None)]
+#[command(name = "cargo-kovi", version, long_about = None)]
 struct Args {
     #[command(subcommand)]
     command: CMDs,
