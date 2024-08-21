@@ -7,7 +7,7 @@ static DEFAULT_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
 #[kovi::plugin]
 pub fn main(mut plugin: PluginBuilder) {
     plugin.on_msg(move |event| {
-        if event.text == Option::Some("hi".to_string()) {
+        if event.borrow_text() == Some("hi") {
             event.reply("hi")
         }
     });
@@ -15,6 +15,7 @@ pub fn main(mut plugin: PluginBuilder) {
 "#;
 
 static DEFAULT_MAIN_CODE: &str = r#"use kovi::build_bot;
+
 fn main() {
     kovi::set_logger();
     build_bot!().run();

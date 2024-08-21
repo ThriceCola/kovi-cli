@@ -62,14 +62,21 @@ pub fn new_plugin(name: String) {
                         .expect("Failed to write to Cargo.toml");
                 }
                 toml::Value::Table(table) => {
-                    writeln!(cargo_toml, "kovi = {{").expect("Failed to write to Cargo.toml");
-                    for (key, value) in table {
+                    write!(cargo_toml, "kovi = {{ ").expect("Failed to write to Cargo.toml");
+                    let mut iter = table.iter().peekable();
+                    while let Some((key, value)) = iter.next() {
                         if key == "path" {
-                            writeln!(cargo_toml, "path = ../../{},", value)
+                            write!(cargo_toml, "path = ../../{}", value)
                                 .expect("Failed to write to Cargo.toml");
                         } else {
-                            writeln!(cargo_toml, "{} = {},", key, value)
+                            write!(cargo_toml, "{} = {}", key, value)
                                 .expect("Failed to write to Cargo.toml");
+                        }
+
+                        if iter.peek().is_some() {
+                            write!(cargo_toml, ", ").expect("Failed to write to Cargo.toml");
+                        } else {
+                            write!(cargo_toml, " ").expect("Failed to write to Cargo.toml");
                         }
                     }
                     writeln!(cargo_toml, "}}").expect("Failed to write to Cargo.toml");
