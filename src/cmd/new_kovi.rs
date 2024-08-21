@@ -65,9 +65,10 @@ pub fn new_kovi(name: String, version: Option<String>) {
             #[allow(clippy::format_in_format_args)]
             {
                 println!(
-                    "\n{}\n{}",
+                    "\n{}\n{}\n{}",
                     format!("KoviBot '{}' created successfully!", name).truecolor(202, 225, 205),
-                    format!("You can: \ncd ./{};\nkovi create <NAME>", name)
+                    "You can:",
+                    format!("cd ./{};\ncargo kovi create <NAME>", name).truecolor(202, 225, 205),
                 );
             }
         }

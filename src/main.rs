@@ -1,21 +1,37 @@
 use clap::{Parser, Subcommand};
+use clap_cargo::style::CLAP_STYLING;
 use cmd::{add::add, new_kovi::new_kovi, new_plugin::new_plugin};
 
 mod cmd;
 
-#[derive(Parser, Debug)]
-#[command(name = "cargo-kovi", version, long_about = None)]
-struct Args {
-    #[command(subcommand)]
-    command: CMDs,
+
+#[derive(Parser)]
+#[command(name = "cargo")]
+#[command(bin_name = "cargo")]
+#[command(styles = CLAP_STYLING)]
+enum CargoCli {
+    Kovi(KoviArgs),
 }
 
-#[derive(Debug, Subcommand)]
-enum CMDs {
-    #[command(alias = "c")]
+#[derive(Parser, Debug)]
+#[command(name = "kovi", version, about)]
+struct KoviArgs {
+    #[command(subcommand)]
+    command: KoviCommands,
+}
+
+#[derive(Subcommand, Debug)]
+enum KoviCommands {
+    #[command(
+        alias = "c",
+        about = "Creates a new Kovi plugin with the specified name."
+    )]
     Create { name: String },
 
-    #[command(alias = "n")]
+    #[command(
+        alias = "n",
+        about = "Creates a new Kovi project with a default or specified name and an optional version."
+    )]
     New {
         #[arg(default_value = "kovi-bot")]
         name: String,
@@ -24,17 +40,25 @@ enum CMDs {
         version: Option<String>,
     },
 
-    #[command(alias = "a")]
+    #[command(
+        alias = "a",
+        about = "Adds a new component or dependency to the existing Kovi project."
+    )]
     Add { name: String },
 }
 
-
 fn main() {
-    let args = Args::parse();
+    let CargoCli::Kovi(args) = CargoCli::parse();
 
     match args.command {
-        CMDs::Create { name } => new_plugin(name),
-        CMDs::New { name, version } => new_kovi(name, version),
-        CMDs::Add { name } => add(name),
+        KoviCommands::Create { name } => {
+            new_plugin(name);
+        }
+        KoviCommands::New { name, version } => {
+            new_kovi(name, version);
+        }
+        KoviCommands::Add { name } => {
+            add(name);
+        }
     }
 }
