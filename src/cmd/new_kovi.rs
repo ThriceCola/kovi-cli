@@ -37,12 +37,7 @@ pub fn new_kovi(name: String, version: Option<String>) {
                 },
             };
 
-            writeln!(
-                cargo_toml,
-                "kovi = {{ version = \"{}\", features = [\"logger\"] }}",
-                version
-            )
-            .expect("Failed to write to Cargo.toml");
+            writeln!(cargo_toml, "kovi = \"{}\"", version).expect("Failed to write to Cargo.toml");
 
             // writeln!(cargo_toml, "kovi = {{ path = \"../../kovi\" }}")
             //     .expect("Failed to write to Cargo.toml");
