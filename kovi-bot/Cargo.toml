@@ -1,9 +1,0 @@
-[package]
-name = "kovi-bot"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-kovi = { version = "0.5.0-rc1", features = ["logger"] }
-
-[workspace]
