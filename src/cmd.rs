@@ -48,3 +48,10 @@ pub fn get_latest_version() -> Result<String, Box<dyn std::error::Error>> {
     let response: CrateResponse = serde_json::from_str(&response)?;
     Ok(response.crate_.max_version)
 }
+
+
+#[test]
+fn name() {
+    let a = get_latest_version();
+    println!("{:?}", a)
+}

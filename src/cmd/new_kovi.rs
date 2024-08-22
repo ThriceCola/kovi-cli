@@ -26,7 +26,7 @@ pub fn new_kovi(name: String, version: Option<String>) {
                 None => match get_latest_version() {
                     Ok(v) => v,
                     Err(e) => {
-                        let v = "0.5.1".to_string();
+                        let v = "0.5.2".to_string();
                         //报错获取失败，使用默认版本
                         eprintln!(
                             "Failed to get latest version: {}\nUse default version: {}",
