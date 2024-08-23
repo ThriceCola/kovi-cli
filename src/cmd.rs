@@ -1,6 +1,7 @@
 pub mod add;
 pub mod new_kovi;
 pub mod new_plugin;
+pub mod update;
 
 static DEFAULT_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
 
@@ -21,7 +22,7 @@ fn main() {
 }
 "#;
 
-pub fn get_latest_version() -> Result<String, Box<dyn std::error::Error>> {
+pub fn get_latest_version(name: &str) -> Result<String, Box<dyn std::error::Error>> {
     use serde::Deserialize;
 
     #[derive(Deserialize, Debug)]
@@ -35,13 +36,15 @@ pub fn get_latest_version() -> Result<String, Box<dyn std::error::Error>> {
         max_version: String,
     }
 
-    let url = "https://crates.io/api/v1/crates/kovi".to_string();
+    let url = format!("https://crates.io/api/v1/crates/{name}");
 
     let client = reqwest::blocking::Client::new();
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
         reqwest::header::USER_AGENT,
-        reqwest::header::HeaderValue::from_static("kovi cli (https://github.com/Threkork/Kovi)"),
+        reqwest::header::HeaderValue::from_static(
+            "kovi cli (https://github.com/threkork/kovi-cli)",
+        ),
     );
 
     let response = client.get(&url).headers(headers).send()?.text()?;
@@ -52,6 +55,6 @@ pub fn get_latest_version() -> Result<String, Box<dyn std::error::Error>> {
 
 #[test]
 fn name() {
-    let a = get_latest_version();
+    let a = get_latest_version("kovi-cli");
     println!("{:?}", a)
 }

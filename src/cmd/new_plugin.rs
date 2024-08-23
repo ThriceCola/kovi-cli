@@ -15,12 +15,13 @@ pub fn new_plugin(name: String) {
     let mut cargo_toml = std::fs::OpenOptions::new()
         .read(true)
         .open("Cargo.toml")
-        .expect("Failed to open Cargo.toml");
+        .unwrap_or_else(|e| exit_and_eprintln(e));
 
     let mut contents = String::new();
     cargo_toml
         .read_to_string(&mut contents)
-        .expect("Failed to read Cargo.toml");
+        .unwrap_or_else(|e| exit_and_eprintln(e));
+
     if !contents.contains("[workspace]") {
         eprintln!("This is not a workspace");
         return;
@@ -38,9 +39,9 @@ pub fn new_plugin(name: String) {
             //使用Toml库，获取根目录里面的Cargo.toml的kovi的版本号
             let kovi_dependency = {
                 let root_cargo_toml =
-                    std::fs::read_to_string("Cargo.toml").expect("Failed to read root Cargo.toml");
+                    std::fs::read_to_string("Cargo.toml").unwrap_or_else(|e| exit_and_eprintln(e));
                 let parsed_toml: toml::Value =
-                    toml::from_str(&root_cargo_toml).expect("Failed to parse root Cargo.toml");
+                    toml::from_str(&root_cargo_toml).unwrap_or_else(|e| exit_and_eprintln(e));
 
                 parsed_toml
                     .get("dependencies")
@@ -54,32 +55,32 @@ pub fn new_plugin(name: String) {
             let mut cargo_toml = std::fs::OpenOptions::new()
                 .append(true)
                 .open(cargo_toml_path)
-                .expect("Failed to open Cargo.toml");
+                .unwrap_or_else(|e| exit_and_eprintln(e));
 
             match kovi_dependency {
                 toml::Value::String(version) => {
                     writeln!(cargo_toml, "kovi = \"{}\"", version)
-                        .expect("Failed to write to Cargo.toml");
+                        .unwrap_or_else(|e| exit_and_eprintln(e));
                 }
                 toml::Value::Table(table) => {
-                    write!(cargo_toml, "kovi = {{ ").expect("Failed to write to Cargo.toml");
+                    write!(cargo_toml, "kovi = {{ ").unwrap_or_else(|e| exit_and_eprintln(e));
                     let mut iter = table.iter().peekable();
                     while let Some((key, value)) = iter.next() {
                         if key == "path" {
                             write!(cargo_toml, "path = ../../{}", value)
-                                .expect("Failed to write to Cargo.toml");
+                                .unwrap_or_else(|e| exit_and_eprintln(e));
                         } else {
                             write!(cargo_toml, "{} = {}", key, value)
-                                .expect("Failed to write to Cargo.toml");
+                                .unwrap_or_else(|e| exit_and_eprintln(e));
                         }
 
                         if iter.peek().is_some() {
-                            write!(cargo_toml, ", ").expect("Failed to write to Cargo.toml");
+                            write!(cargo_toml, ", ").unwrap_or_else(|e| exit_and_eprintln(e));
                         } else {
-                            write!(cargo_toml, " ").expect("Failed to write to Cargo.toml");
+                            write!(cargo_toml, " ").unwrap_or_else(|e| exit_and_eprintln(e));
                         }
                     }
-                    writeln!(cargo_toml, "}}").expect("Failed to write to Cargo.toml");
+                    writeln!(cargo_toml, "}}").unwrap_or_else(|e| exit_and_eprintln(e));
                 }
                 _ => panic!("Unexpected format for kovi dependency"),
             }
@@ -109,4 +110,13 @@ pub fn new_plugin(name: String) {
             eprintln!("Failed to execute cargo: {}", e);
         }
     }
+}
+
+fn exit_and_eprintln<E>(e: E) -> !
+where
+    E: std::fmt::Display,
+{
+    eprintln!("Error: {e}");
+    eprintln!("Checking if in correct workspace...");
+    std::process::exit(0);
 }

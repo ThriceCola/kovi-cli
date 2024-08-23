@@ -23,7 +23,7 @@ pub fn new_kovi(name: String, version: Option<String>) {
 
             let version = match version {
                 Some(v) => v,
-                None => match get_latest_version() {
+                None => match get_latest_version("kovi") {
                     Ok(v) => v,
                     Err(e) => {
                         let v = "0.5.2".to_string();
@@ -60,9 +60,8 @@ pub fn new_kovi(name: String, version: Option<String>) {
             #[allow(clippy::format_in_format_args)]
             {
                 println!(
-                    "\n{}\n{}\n{}",
+                    "\n{}\nYou can:\n{}",
                     format!("KoviBot '{}' created successfully!", name).truecolor(202, 225, 205),
-                    "You can:",
                     format!("cd ./{};\ncargo kovi create <NAME>", name).truecolor(202, 225, 205),
                 );
             }

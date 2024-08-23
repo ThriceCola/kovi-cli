@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use clap_cargo::style::CLAP_STYLING;
-use cmd::{add::add, new_kovi::new_kovi, new_plugin::new_plugin};
+use cmd::{add::add, new_kovi::new_kovi, new_plugin::new_plugin, update::update};
 
 mod cmd;
 
@@ -45,20 +45,18 @@ enum KoviCommands {
         about = "Adds a new component or dependency to the existing Kovi project."
     )]
     Add { name: String },
+
+    #[command(about = "Updates the Kovi cli to the latest version.")]
+    Update,
 }
 
 fn main() {
     let CargoCli::Kovi(args) = CargoCli::parse();
 
     match args.command {
-        KoviCommands::Create { name } => {
-            new_plugin(name);
-        }
-        KoviCommands::New { name, version } => {
-            new_kovi(name, version);
-        }
-        KoviCommands::Add { name } => {
-            add(name);
-        }
+        KoviCommands::Create { name } => new_plugin(name),
+        KoviCommands::New { name, version } => new_kovi(name, version),
+        KoviCommands::Add { name } => add(name),
+        KoviCommands::Update => update(),
     }
 }
