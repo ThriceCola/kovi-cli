@@ -29,7 +29,6 @@ pub fn add(name: String) {
         }
         Err(e) => {
             println!("{e}");
-            return;
         }
     }
 }
@@ -54,7 +53,6 @@ fn crates_io(name: &str) {
                         format!("Plugin '{}' from crates.io add successfully!", crate_name)
                             .truecolor(202, 225, 205),
                     );
-                    return;
                 }
                 Ok(status) => {
                     eprintln!("Cargo exited with status: {}", status);
@@ -64,12 +62,11 @@ fn crates_io(name: &str) {
                 }
             }
         }
-        Err(e) => match e {
-            crates_io_api::Error::NotFound(_) => {
+        Err(e) => {
+            if let crates_io_api::Error::NotFound(_) = e {
                 eprintln!("Plugin '{}' not found on crates.io", crate_name)
             }
-            _ => {}
-        },
+        }
     }
 }
 
