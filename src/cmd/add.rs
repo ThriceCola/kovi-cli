@@ -17,18 +17,12 @@ pub fn add(name: String) {
     match plugin_path.try_exists() {
         Ok(boo) => {
             if !boo {
-                println!(
-                    "{}{}",
-                    "try to add plugin from crates.io...".truecolor(234, 108, 108),
-                    plugin_path_str.to_string().truecolor(234, 108, 108)
-                );
+                let msg = format!("try to add {} plugin from crates.io ...", plugin_path_str);
+                println!("{}", msg.truecolor(202, 225, 205));
                 crates_io(&name);
             } else {
-                println!(
-                    "{}{}",
-                    "Add plugin from local...".truecolor(234, 108, 108),
-                    plugin_path_str.to_string().truecolor(234, 108, 108)
-                );
+                let msg = format!("add {} plugin from local ...", plugin_path_str);
+                println!("{}", msg.truecolor(202, 225, 205));
 
                 local(plugin_path, &name)
             }
@@ -42,15 +36,15 @@ pub fn add(name: String) {
 
 fn crates_io(name: &str) {
     //检测name之前是否包含 "kovi-plugin-"
-    let crate_name = if !name.starts_with("kovi-plugin-") {
+    let crate_name = if name.starts_with("kovi-plugin-") {
         name.to_string()
     } else {
         format!("kovi-plugin-{name}")
     };
 
     let client = get_client();
-    match client.get_crate(name) {
-        Ok(v) => {
+    match client.get_crate(&crate_name) {
+        Ok(_) => {
             let mut add_command = Command::new("cargo");
             add_command.arg("add").arg(&crate_name);
             match add_command.status() {
@@ -71,8 +65,8 @@ fn crates_io(name: &str) {
             }
         }
         Err(e) => match e {
-            crates_io_api::Error::NotFound(e) => {
-                eprintln!("Plugin '{}' not found on crates.io", e)
+            crates_io_api::Error::NotFound(_) => {
+                eprintln!("Plugin '{}' not found on crates.io", crate_name)
             }
             _ => {}
         },
@@ -88,9 +82,8 @@ fn local(plugin_path: &Path, name: &str) {
         Ok(status) if status.success() => {
             println!(
                 "\n{}",
-                format!("Plugin '{}' form local add successfully!", name)
+                format!("Plugin '{}' form local add successfully!", name).truecolor(202, 225, 205)
             );
-            return;
         }
         Ok(status) => {
             eprintln!("Cargo exited with status: {}", status);
