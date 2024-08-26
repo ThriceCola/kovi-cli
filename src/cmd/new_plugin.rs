@@ -67,7 +67,7 @@ pub fn new_plugin(name: String) {
                     let mut iter = table.iter().peekable();
                     while let Some((key, value)) = iter.next() {
                         if key == "path" {
-                            write!(cargo_toml, "path = ../../{}", value)
+                            write!(cargo_toml, "path = \"../../{}\"", value.as_str().unwrap())
                                 .unwrap_or_else(|e| exit_and_eprintln(e));
                         } else {
                             write!(cargo_toml, "{} = {}", key, value)
@@ -101,6 +101,24 @@ pub fn new_plugin(name: String) {
             println!(
                 "\n{}",
                 format!("Plugin '{}' created successfully!", name).truecolor(202, 225, 205),
+            );
+        }
+        Ok(status) => {
+            eprintln!("Cargo exited with status: {}", status);
+        }
+        Err(e) => {
+            eprintln!("Failed to execute cargo: {}", e);
+        }
+    }
+
+    let mut cargo_command = Command::new("cargo");
+    cargo_command.arg("add").arg("--path").arg(path);
+
+    match cargo_command.status() {
+        Ok(status) if status.success() => {
+            println!(
+                "\n{}",
+                format!("Plugin '{}' add successfully!", name).truecolor(202, 225, 205),
             );
         }
         Ok(status) => {

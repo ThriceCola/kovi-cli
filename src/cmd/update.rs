@@ -26,7 +26,7 @@ pub fn update() {
     }
 
     // [Y/n] 确认
-    println!(
+    print!(
         "There is a new version of kovi-cli\n{}\n:: Proceed with the installation? [Y/n]",
         format!("({new_version})").truecolor(202, 225, 205)
     );

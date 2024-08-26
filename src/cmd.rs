@@ -1,3 +1,5 @@
+use crates_io_api::SyncClient;
+
 pub mod add;
 pub mod new_kovi;
 pub mod new_plugin;
@@ -23,38 +25,38 @@ fn main() {
 "#;
 
 pub fn get_latest_version(name: &str) -> Result<String, Box<dyn std::error::Error>> {
-    use serde::Deserialize;
+    let client = get_client();
 
-    #[derive(Deserialize, Debug)]
-    struct CrateResponse {
-        #[serde(rename = "crate")]
-        crate_: CrateInfo,
-    }
+    let cli_info = client.get_crate(name).unwrap();
 
-    #[derive(Deserialize, Debug)]
-    struct CrateInfo {
-        max_version: String,
-    }
+    let max_version = cli_info.crate_data.max_version;
 
-    let url = format!("https://crates.io/api/v1/crates/{name}");
+    Ok(max_version)
+}
 
-    let client = reqwest::blocking::Client::new();
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert(
-        reqwest::header::USER_AGENT,
-        reqwest::header::HeaderValue::from_static(
-            "kovi cli (https://github.com/threkork/kovi-cli)",
-        ),
-    );
-
-    let response = client.get(&url).headers(headers).send()?.text()?;
-    let response: CrateResponse = serde_json::from_str(&response)?;
-    Ok(response.crate_.max_version)
+pub fn get_client() -> SyncClient {
+    SyncClient::new(
+        "kovi cli (https://github.com/threkork/kovi-cli)",
+        std::time::Duration::from_millis(1000),
+    )
+    .unwrap()
 }
 
 
 #[test]
-fn name() {
+fn latest() {
     let a = get_latest_version("kovi-cli");
     println!("{:?}", a)
+}
+
+#[test]
+fn crates_io_some() {
+    let client = SyncClient::new(
+        "kovi cli (https://github.com/threkork/kovi-cli)",
+        std::time::Duration::from_millis(1000),
+    )
+    .unwrap();
+
+    let a = client.get_crate("kovi-plugin").unwrap();
+    println!("{:?}", a);
 }
