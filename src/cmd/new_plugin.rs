@@ -2,7 +2,7 @@ use crate::cmd::DEFAULT_PLUGIN_CODE;
 use colored::Colorize;
 use std::io::Read;
 use std::io::Write;
-use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 
 pub fn new_plugin(name: String) {
@@ -28,11 +28,10 @@ pub fn new_plugin(name: String) {
     }
 
 
-    let path = format!("plugins/{name}");
-    let path = Path::new(&path);
+    let path = PathBuf::from(&format!("plugins")).join(format!("{name}"));
 
     let mut cargo_command = Command::new("cargo");
-    cargo_command.arg("new").arg(path).arg("--lib");
+    cargo_command.arg("new").arg(&path).arg("--lib");
 
     match cargo_command.status() {
         Ok(status) if status.success() => {
