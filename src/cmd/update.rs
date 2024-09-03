@@ -26,10 +26,12 @@ pub fn update() {
     }
 
     // [Y/n] 确认
-    print!(
-        "There is a new version of kovi-cli\n{}\n:: Proceed with the installation? [Y/n]",
+    println!(
+        "There is a new version of kovi-cli\n{}",
         format!("({new_version})").truecolor(202, 225, 205)
     );
+    print!("Proceed with the installation? [Y/n]");
+
     let mut input = String::new();
 
     io::stdin()
