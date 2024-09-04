@@ -1,5 +1,8 @@
 use colored::Colorize;
-use std::{io, process::Command};
+use std::{
+    io::{self, Write},
+    process::Command,
+};
 
 use super::get_latest_version;
 
@@ -26,11 +29,11 @@ pub fn update() {
     }
 
     // [Y/n] 确认
-    println!(
-        "There is a new version of kovi-cli\n{}",
+    print!(
+        "There is a new version of kovi-cli\n{}\n:: Proceed with the installation? [Y/n]",
         format!("({new_version})").truecolor(202, 225, 205)
     );
-    print!("Proceed with the installation? [Y/n]");
+    io::stdout().flush().unwrap();
 
     let mut input = String::new();
 
