@@ -42,7 +42,11 @@ pub fn new_kovi(name: String, version: Option<String>) {
             // writeln!(cargo_toml, "kovi = {{ path = \"../../kovi\" }}")
             //     .expect("Failed to write to Cargo.toml");
 
-            writeln!(cargo_toml, "\n[workspace]").expect("Failed to write to Cargo.toml");
+            writeln!(
+                cargo_toml,
+                "\n[workspace]\n\n[workspace.dependencies]\nkovi = \"{version}\""
+            )
+            .expect("Failed to write to Cargo.toml");
             // 清空src/main.rs，然后传入默认的代码
             let main_path = path.join("src/main.rs");
             let mut main_rs = std::fs::OpenOptions::new()
@@ -62,7 +66,7 @@ pub fn new_kovi(name: String, version: Option<String>) {
                 println!(
                     "\n{}\nYou can:\n{}",
                     format!("KoviBot '{}' created successfully!", name).truecolor(202, 225, 205),
-                    format!("cd ./{};\ncargo kovi create <NAME>", name).truecolor(202, 225, 205),
+                    format!("cd ./{}\ncargo kovi create <NAME>", name).truecolor(202, 225, 205),
                 );
             }
         }

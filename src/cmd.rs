@@ -5,6 +5,13 @@ pub mod new_kovi;
 pub mod new_plugin;
 pub mod update;
 
+static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
+
+#[kovi::plugin]
+pub fn main(mut p: PluginBuilder) {
+}
+"#;
+
 static DEFAULT_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
 
 #[kovi::plugin]

@@ -26,7 +26,11 @@ enum KoviCommands {
         alias = "c",
         about = "Creates a new Kovi plugin with the specified name."
     )]
-    Create { name: String },
+    Create {
+        name: String,
+        #[arg(short, long, help = "Generate lib.rs without extra examples")]
+        simple: bool,
+    },
 
     #[command(
         alias = "n",
@@ -54,7 +58,7 @@ fn main() {
     let CargoCli::Kovi(args) = CargoCli::parse();
 
     match args.command {
-        KoviCommands::Create { name } => new_plugin(name),
+        KoviCommands::Create { name, simple } => new_plugin(name, simple),
         KoviCommands::New { name, version } => new_kovi(name, version),
         KoviCommands::Add { name } => add(name),
         KoviCommands::Update => update(),
