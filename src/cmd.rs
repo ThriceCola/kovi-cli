@@ -5,18 +5,20 @@ pub mod new_kovi;
 pub mod new_plugin;
 pub mod update;
 
-static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
+static KOVI_DEFAULT_VERSION: &str = "0.8.0";
+
+static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder as p;
 
 #[kovi::plugin]
-pub fn main(mut p: PluginBuilder) {
+async fn main() {
 }
 "#;
 
-static DEFAULT_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder;
+static DEFAULT_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder as plugin;
 
 #[kovi::plugin]
-pub fn main(mut plugin: PluginBuilder) {
-    plugin.on_msg(move |event| {
+async fn main() {
+    plugin::on_msg(|event| async move {
         if event.borrow_text() == Some("hi") {
             event.reply("hi")
         }

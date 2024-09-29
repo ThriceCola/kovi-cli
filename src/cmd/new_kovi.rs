@@ -1,4 +1,4 @@
-use crate::cmd::{get_latest_version, DEFAULT_MAIN_CODE};
+use crate::cmd::{get_latest_version, DEFAULT_MAIN_CODE, KOVI_DEFAULT_VERSION};
 use colored::Colorize;
 use std::io::Write;
 use std::path::Path;
@@ -26,7 +26,7 @@ pub fn new_kovi(name: String, version: Option<String>) {
                 None => match get_latest_version("kovi") {
                     Ok(v) => v,
                     Err(e) => {
-                        let v = "0.5.2".to_string();
+                        let v = KOVI_DEFAULT_VERSION.to_string();
                         //报错获取失败，使用默认版本
                         eprintln!(
                             "Failed to get latest version: {}\nUse default version: {}",
