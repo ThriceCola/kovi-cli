@@ -5,7 +5,7 @@ pub mod new_kovi;
 pub mod new_plugin;
 pub mod update;
 
-static KOVI_DEFAULT_VERSION: &str = "0.8.0";
+static KOVI_DEFAULT_VERSION: &str = "0.8";
 
 static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder as p;
 
