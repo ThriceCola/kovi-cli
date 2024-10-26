@@ -19,7 +19,7 @@ pub fn add(name: String) {
             if !boo {
                 let msg = format!("try to add {} plugin from crates.io ...", plugin_path_str);
                 println!("{}", msg.truecolor(202, 225, 205));
-                crates_io(&name);
+                crates_io(&name, None);
             } else {
                 let msg = format!("add {} plugin from local ...", plugin_path_str);
                 println!("{}", msg.truecolor(202, 225, 205));
@@ -33,7 +33,42 @@ pub fn add(name: String) {
     }
 }
 
-fn crates_io(name: &str) {
+pub fn add_to(name: String, to: String) {
+    if name.is_empty() {
+        eprintln!("Name cannot be empty");
+        return;
+    }
+
+    if to.is_empty() {
+        eprintln!("To <something> cannot be empty");
+        return;
+    }
+
+    let plugin_path_str = format!("plugins/{to}");
+    let plugin_path = Path::new(&plugin_path_str);
+
+    // 检测有没有这个插件
+    match plugin_path.try_exists() {
+        Ok(boo) => {
+            if boo {
+                // check if the plugin `name` exists from crates.io
+                let msg = format!(
+                    "try to add {} plugin from crates.io to {} plugin...",
+                    name, to
+                );
+                println!("{}", msg.truecolor(202, 225, 205));
+                crates_io(&name, Some(&to));
+            } else {
+                eprintln!("Plugin directory '{}' does not exist", plugin_path_str);
+            }
+        }
+        Err(e) => {
+            println!("{e}");
+        }
+    }
+}
+
+fn crates_io(name: &str, to: Option<&str>) {
     //检测name之前是否包含 "kovi-plugin-"
     let crate_name = if name.starts_with("kovi-plugin-") {
         name.to_string()
@@ -46,6 +81,11 @@ fn crates_io(name: &str) {
         Ok(_) => {
             let mut add_command = Command::new("cargo");
             add_command.arg("add").arg(&crate_name);
+
+            if let Some(to) = to {
+                add_command.arg("--package").arg(&to);
+            }
+
             match add_command.status() {
                 Ok(status) if status.success() => {
                     println!(

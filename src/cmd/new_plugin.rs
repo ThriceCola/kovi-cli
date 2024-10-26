@@ -6,11 +6,17 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 
-pub fn new_plugin(name: String, simple: bool) {
+pub fn new_plugin(name: String, simple: bool, prefix: bool) {
     if name.is_empty() {
         eprintln!("Name cannot be empty");
         return;
     }
+
+    let name = if prefix {
+        "kovi-plugin-".to_string() + &name
+    } else {
+        name
+    };
 
     let plugin_path = PathBuf::from("plugins".to_string()).join(&name);
 

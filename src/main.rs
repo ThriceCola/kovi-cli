@@ -1,6 +1,11 @@
 use clap::{Parser, Subcommand};
 use clap_cargo::style::CLAP_STYLING;
-use cmd::{add::add, new_kovi::new_kovi, new_plugin::new_plugin, update::update};
+use cmd::{
+    add::{add, add_to},
+    new_kovi::new_kovi,
+    new_plugin::new_plugin,
+    update::update,
+};
 
 mod cmd;
 
@@ -30,6 +35,8 @@ enum KoviCommands {
         name: String,
         #[arg(short, long, help = "Generate lib.rs without extra examples")]
         simple: bool,
+        #[arg(short, long, help = "Add 'kovi-plugin-' prefix to the plugin name")]
+        prefix: bool,
     },
 
     #[command(
@@ -48,7 +55,12 @@ enum KoviCommands {
         alias = "a",
         about = "Adds a new component or dependency to the existing Kovi project."
     )]
-    Add { name: String },
+    Add {
+        name: String,
+        /// 给某一个插件添加依赖项
+        #[arg(short, long, help = "Add a dependency to a specific plugin")]
+        to: Option<String>,
+    },
 
     #[command(about = "Updates the Kovi cli to the latest version.")]
     Update,
@@ -58,9 +70,16 @@ fn main() {
     let CargoCli::Kovi(args) = CargoCli::parse();
 
     match args.command {
-        KoviCommands::Create { name, simple } => new_plugin(name, simple),
+        KoviCommands::Create {
+            name,
+            simple,
+            prefix,
+        } => new_plugin(name, simple, prefix),
         KoviCommands::New { name, version } => new_kovi(name, version),
-        KoviCommands::Add { name } => add(name),
+        KoviCommands::Add { name, to } => match to {
+            Some(to) => add_to(name, to),
+            None => add(name),
+        },
         KoviCommands::Update => update(),
     }
 }
