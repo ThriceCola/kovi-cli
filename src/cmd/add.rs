@@ -33,18 +33,18 @@ pub fn add(name: String) {
     }
 }
 
-pub fn add_to(name: String, to: String) {
+pub fn add_to(name: String, package: String) {
     if name.is_empty() {
         eprintln!("Name cannot be empty");
         return;
     }
 
-    if to.is_empty() {
+    if package.is_empty() {
         eprintln!("To <something> cannot be empty");
         return;
     }
 
-    let plugin_path_str = format!("plugins/{to}");
+    let plugin_path_str = format!("plugins/{package}");
     let plugin_path = Path::new(&plugin_path_str);
 
     // 检测有没有这个插件
@@ -54,10 +54,10 @@ pub fn add_to(name: String, to: String) {
                 // check if the plugin `name` exists from crates.io
                 let msg = format!(
                     "try to add {} plugin from crates.io to {} plugin...",
-                    name, to
+                    name, package
                 );
                 println!("{}", msg.truecolor(202, 225, 205));
-                crates_io(&name, Some(&to));
+                crates_io(&name, Some(&package));
             } else {
                 eprintln!("Plugin directory '{}' does not exist", plugin_path_str);
             }
@@ -68,7 +68,7 @@ pub fn add_to(name: String, to: String) {
     }
 }
 
-fn crates_io(name: &str, to: Option<&str>) {
+fn crates_io(name: &str, package: Option<&str>) {
     //检测name之前是否包含 "kovi-plugin-"
     let crate_name = if name.starts_with("kovi-plugin-") {
         name.to_string()
@@ -82,8 +82,8 @@ fn crates_io(name: &str, to: Option<&str>) {
             let mut add_command = Command::new("cargo");
             add_command.arg("add").arg(&crate_name);
 
-            if let Some(to) = to {
-                add_command.arg("--package").arg(&to);
+            if let Some(package) = package {
+                add_command.arg("--package").arg(&package);
             }
 
             match add_command.status() {

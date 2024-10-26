@@ -59,7 +59,7 @@ enum KoviCommands {
         name: String,
         /// 给某一个插件添加依赖项
         #[arg(short, long, help = "Add a dependency to a specific plugin")]
-        to: Option<String>,
+        package: Option<String>,
     },
 
     #[command(about = "Updates the Kovi cli to the latest version.")]
@@ -76,8 +76,8 @@ fn main() {
             prefix,
         } => new_plugin(name, simple, prefix),
         KoviCommands::New { name, version } => new_kovi(name, version),
-        KoviCommands::Add { name, to } => match to {
-            Some(to) => add_to(name, to),
+        KoviCommands::Add { name, package } => match package {
+            Some(package) => add_to(name, package),
             None => add(name),
         },
         KoviCommands::Update => update(),
