@@ -6,6 +6,7 @@ use std::{
 
 use super::get_latest_version;
 
+#[cfg(not(windows))]
 pub fn update() {
     let now_version = env!("CARGO_PKG_VERSION");
     let new_version = match get_latest_version("kovi-cli") {
@@ -64,4 +65,38 @@ pub fn update() {
             eprintln!("Failed to execute cargo: {}", e);
         }
     }
+}
+
+
+#[cfg(windows)]
+pub fn update() {
+    let now_version = env!("CARGO_PKG_VERSION");
+    let new_version = match get_latest_version("kovi-cli") {
+        Ok(v) => v,
+        Err(e) => {
+            eprintln!(
+                "Failed to get latest version: {}, please check your network connection.",
+                e
+            );
+            return;
+        }
+    };
+
+    if now_version == new_version {
+        println!(
+            "\n{}",
+            format!("You are using the latest version ({new_version}) of Kovi cli.")
+                .truecolor(202, 225, 205),
+        );
+        return;
+    }
+
+    println!(
+        "There is a new version of kovi-cli\n{}",
+        format!("({new_version})").truecolor(202, 225, 205)
+    );
+
+    println!("\nSorry");
+    println!("On Windows, please manually update by running:");
+    println!("    cargo install kovi-cli");
 }
