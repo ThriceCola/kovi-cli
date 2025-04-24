@@ -8,32 +8,39 @@ use super::get_latest_version;
 
 #[cfg(not(windows))]
 pub fn update() {
+    use crate::{
+        locales::LocaleArgs, proceed_with_the_installation, update_get_latest_version_err,
+        update_has_new_version, update_using_the_latest_version,
+    };
+
     let now_version = env!("CARGO_PKG_VERSION");
     let new_version = match get_latest_version("kovi-cli") {
         Ok(v) => v,
         Err(e) => {
-            eprintln!(
-                "Failed to get latest version: {}, please check your network connection.",
-                e
-            );
+            let msg = update_get_latest_version_err(&format!("{e}"));
+            eprintln!("{msg}");
             return;
         }
     };
 
     if now_version == new_version {
-        println!(
-            "\n{}",
-            format!("You are using the latest version ({new_version}) of Kovi cli.")
-                .truecolor(202, 225, 205),
-        );
+        let msg = update_using_the_latest_version(&new_version);
+        println!("\n{}", msg.truecolor(202, 225, 205),);
         return;
     }
 
-    // [Y/n] 确认
-    print!(
-        "There is a new version of kovi-cli\n{}\n:: Proceed with the installation? [Y/n]",
-        format!("({new_version})").truecolor(202, 225, 205)
-    );
+    {
+        let update_has_new_version = update_has_new_version();
+        let proceed_with_the_installation = proceed_with_the_installation();
+
+        // [Y/n] 确认
+        print!(
+            "{}\n{}\n:: {} [Y/n]",
+            update_has_new_version,
+            format!("({new_version})").truecolor(202, 225, 205),
+            proceed_with_the_installation
+        );
+    }
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -66,7 +73,6 @@ pub fn update() {
         }
     }
 }
-
 
 #[cfg(windows)]
 pub fn update() {

@@ -8,7 +8,9 @@ use cmd::{
 };
 
 mod cmd;
+mod locales;
 
+pub(crate) use locales::*;
 
 #[derive(Parser)]
 #[command(name = "cargo")]

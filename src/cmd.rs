@@ -5,9 +5,9 @@ pub mod new_kovi;
 pub mod new_plugin;
 pub mod update;
 
-static KOVI_DEFAULT_VERSION: &str = "0.8";
+static KOVI_DEFAULT_VERSION: &str = "0.11";
 
-static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder as p;
+static SIMPLE_PLUGIN_CODE: &str = r#"use kovi::PluginBuilder as P;
 
 #[kovi::plugin]
 async fn main() {
@@ -33,6 +33,13 @@ fn main() {
 }
 "#;
 
+static DEFAULT_MAIN_CODE_HAS_CMD: &str = r#"use kovi::build_bot;
+
+fn main() {
+    build_bot!(kovi_plugin_cmd).run();
+}
+"#;
+
 pub fn get_latest_version(name: &str) -> Result<String, Box<dyn std::error::Error>> {
     let client = get_client();
 
@@ -45,12 +52,11 @@ pub fn get_latest_version(name: &str) -> Result<String, Box<dyn std::error::Erro
 
 pub fn get_client() -> SyncClient {
     SyncClient::new(
-        "kovi cli (https://github.com/threkork/kovi-cli)",
+        "kovi cli (https://github.com/thricecola/kovi-cli)",
         std::time::Duration::from_millis(1000),
     )
     .unwrap()
 }
-
 
 #[test]
 fn latest() {
@@ -61,11 +67,11 @@ fn latest() {
 #[test]
 fn crates_io_some() {
     let client = SyncClient::new(
-        "kovi cli (https://github.com/threkork/kovi-cli)",
+        "kovi cli (https://github.com/thricecola/kovi-cli)",
         std::time::Duration::from_millis(1000),
     )
     .unwrap();
 
-    let a = client.get_crate("kovi-plugin").unwrap();
+    let a = client.get_crate("kovi").unwrap();
     println!("{:?}", a);
 }
