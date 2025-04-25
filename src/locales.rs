@@ -26,9 +26,32 @@ pub(crate) fn update_has_new_version() -> Cow<'static, str> {
     LOCALE.message("update-has-new-version", None).unwrap()
 }
 
+pub(crate) fn cli_update_successful() -> Cow<'static, str> {
+    LOCALE.message("cli-update-successful", None).unwrap()
+}
+
 pub(crate) fn proceed_with_the_installation() -> Cow<'static, str> {
     LOCALE
         .message("proceed-with-the-installation", None)
+        .unwrap()
+}
+
+pub(crate) fn cargo_exited_with_status(status: &str) -> Cow<'_, str> {
+    LOCALE
+        .message(
+            "cargo-exited-with-status",
+            Some(&LocaleArgs::new().set("status", status)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn failed_to_execute_cargo() -> Cow<'static, str> {
+    LOCALE.message("failed-to-execute-cargo", None).unwrap()
+}
+
+pub(crate) fn update_windows_manually_to_use() -> Cow<'static, str> {
+    LOCALE
+        .message("update-windows-manually-to-use", None)
         .unwrap()
 }
 
@@ -122,19 +145,24 @@ fn get_system_locale() -> String {
         .unwrap_or_else(|_| "en-US".to_string())
 }
 
-#[test]
-fn test_init_fluent() {
-    init_fluent();
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_get_message() {
-    let msg = LOCALE
-        .get_message(
-            "updete-get-latest-version-err",
-            Some(&LocaleArgs::new().set("error", "i am error")),
-        )
-        .unwrap();
+    #[test]
+    fn test_init_fluent() {
+        init_fluent();
+    }
 
-    println!("{msg}",);
+    #[test]
+    fn test_get_message() {
+        let msg = LOCALE
+            .message(
+                "updete-get-latest-version-err",
+                Some(&LocaleArgs::new().set("error", "i am error")),
+            )
+            .unwrap();
+
+        println!("{msg}",);
+    }
 }

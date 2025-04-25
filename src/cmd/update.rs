@@ -9,7 +9,7 @@ use super::get_latest_version;
 #[cfg(not(windows))]
 pub fn update() {
     use crate::{
-        locales::LocaleArgs, proceed_with_the_installation, update_get_latest_version_err,
+        cli_update_successful, proceed_with_the_installation, update_get_latest_version_err,
         update_has_new_version, update_using_the_latest_version,
     };
 
@@ -17,7 +17,8 @@ pub fn update() {
     let new_version = match get_latest_version("kovi-cli") {
         Ok(v) => v,
         Err(e) => {
-            let msg = update_get_latest_version_err(&format!("{e}"));
+            let err = format!("{e}");
+            let msg = update_get_latest_version_err(&err);
             eprintln!("{msg}");
             return;
         }
@@ -60,10 +61,9 @@ pub fn update() {
 
     match cargo_command.status() {
         Ok(status) if status.success() => {
-            println!(
-                "\n{}",
-                "Kovi cli update successful!".truecolor(202, 225, 205),
-            );
+            let msg = cli_update_successful();
+
+            println!("\n{}", "msg".truecolor(202, 225, 205),);
         }
         Ok(status) => {
             eprintln!("Cargo exited with status: {}", status);

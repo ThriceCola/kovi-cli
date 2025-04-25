@@ -3,3 +3,11 @@ update-using-the-latest-version = You are using the latest version ({ $version }
 update-has-new-version = There is a new version of kovi-cli.
 
 proceed-with-the-installation = Proceed with the installation?
+
+cli-update-successful = Kovi cli update successful!
+
+cargo-exited-with-status = Cargo exited with status: { $status }
+failed-to-execute-cargo = Failed to execute cargo:
+
+update-windows-manually-to-use = Sorry
+                                On Windows, please manually update by running:
