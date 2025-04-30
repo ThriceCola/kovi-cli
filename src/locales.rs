@@ -4,7 +4,7 @@ use fluent::{FluentArgs, FluentResource};
 use std::{borrow::Cow, env, sync::LazyLock};
 use unic_langid::langid;
 
-pub(crate) fn update_get_latest_version_err(err: &str) -> Cow<'_, str> {
+pub(crate) fn update_get_latest_version_err(err: &str) -> Cow<'static, str> {
     LOCALE
         .message(
             "update-get-latest-version-err",
@@ -13,7 +13,7 @@ pub(crate) fn update_get_latest_version_err(err: &str) -> Cow<'_, str> {
         .unwrap()
 }
 
-pub(crate) fn update_using_the_latest_version(version: &str) -> Cow<'_, str> {
+pub(crate) fn update_using_the_latest_version(version: &str) -> Cow<'static, str> {
     LOCALE
         .message(
             "update-using-the-latest-version",
@@ -36,7 +36,7 @@ pub(crate) fn proceed_with_the_installation() -> Cow<'static, str> {
         .unwrap()
 }
 
-pub(crate) fn cargo_exited_with_status(status: &str) -> Cow<'_, str> {
+pub(crate) fn cargo_exited_with_status(status: &str) -> Cow<'static, str> {
     LOCALE
         .message(
             "cargo-exited-with-status",
@@ -45,13 +45,157 @@ pub(crate) fn cargo_exited_with_status(status: &str) -> Cow<'_, str> {
         .unwrap()
 }
 
-pub(crate) fn failed_to_execute_cargo() -> Cow<'static, str> {
-    LOCALE.message("failed-to-execute-cargo", None).unwrap()
+pub(crate) fn failed_to_execute_cargo(error: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "failed-to-execute-cargo",
+            Some(&LocaleArgs::new().set("error", error)),
+        )
+        .unwrap()
 }
 
+#[allow(dead_code)]
 pub(crate) fn update_windows_manually_to_use() -> Cow<'static, str> {
     LOCALE
         .message("update-windows-manually-to-use", None)
+        .unwrap()
+}
+
+pub(crate) fn name_cannot_be_empty() -> Cow<'static, str> {
+    LOCALE.message("name-cannot-be-empty", None).unwrap()
+}
+
+pub(crate) fn not_cargo_workspace() -> Cow<'static, str> {
+    LOCALE.message("not-cargo-workspace", None).unwrap()
+}
+
+pub(crate) fn plugin_created_successfully(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-created-successfully",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn plugin_added_successfully(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-added-successfully",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn error_eprintln(error: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "error-eprintln",
+            Some(&LocaleArgs::new().set("error", error)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn new_kovi_version_error(version: &str, err: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "new-kovi-version-error",
+            Some(&LocaleArgs::new().set("error", err).set("version", version)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn kovi_workspace_created_successfully(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "kovi-workspace-created-successfully",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn you_can() -> Cow<'static, str> {
+    LOCALE.message("you-can", None).unwrap()
+}
+
+pub(crate) fn next_steps_for_kovi_workspace(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "next-steps-for-kovi-workspace",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn try_add_plugin_from_crates_io(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "try-add-plugin-from-crates-io",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn add_local_plugin(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "add-local-plugin",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn to_something_cannot_be_empty() -> Cow<'static, str> {
+    LOCALE
+        .message("to-something-cannot-be-empty", None)
+        .unwrap()
+}
+
+pub(crate) fn try_add_plugin_from_crates_io_to_local_plugin(
+    name: &str,
+    package: &str,
+) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "try-add-plugin-from-crates-io-to-local-plugin",
+            Some(&LocaleArgs::new().set("name", name).set("package", package)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn plugin_directory_does_not_exist(directory: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-directory-does-not-exist",
+            Some(&LocaleArgs::new().set("directory", directory)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn plugin_added_from_crates_io_successfully(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-added-from-crates-io-successfully",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn plugin_not_found_on_crates_io(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-not-found-on-crates-io",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
+        .unwrap()
+}
+
+pub(crate) fn plugin_local_added_successfully(name: &str) -> Cow<'static, str> {
+    LOCALE
+        .message(
+            "plugin-local-added-successfully",
+            Some(&LocaleArgs::new().set("name", name)),
+        )
         .unwrap()
 }
 
@@ -95,10 +239,10 @@ impl LocaleContext {
         Self { ftl: init_fluent() }
     }
 
-    pub(crate) fn message<'bundle, 'args>(
+    pub(crate) fn message<'bundle>(
         &'bundle self,
         id: &str,
-        args: Option<&'args LocaleArgs<'_>>,
+        args: Option<&LocaleArgs<'_>>,
     ) -> Result<Cow<'bundle, str>> {
         let msg = self
             .ftl
@@ -164,5 +308,92 @@ mod tests {
             .unwrap();
 
         println!("{msg}",);
+    }
+
+    #[test]
+    fn test_print_local() {
+        // 1. update_get_latest_version_err
+        println!(
+            "{}",
+            update_get_latest_version_err("Failed to fetch latest version")
+        );
+
+        // 2. update_using_the_latest_version
+        println!("{}", update_using_the_latest_version("v1.0.0"));
+
+        // 3. update_has_new_version
+        println!("{}", update_has_new_version());
+
+        // 4. cli_update_successful
+        println!("{}", cli_update_successful());
+
+        // 5. proceed_with_the_installation
+        println!("{}", proceed_with_the_installation());
+
+        // 6. cargo_exited_with_status
+        println!("{}", cargo_exited_with_status("127"));
+
+        // 7. failed_to_execute_cargo
+        println!("{}", failed_to_execute_cargo("Cargo command not found"));
+
+        // 8. update_windows_manually_to_use
+        println!("{}", update_windows_manually_to_use());
+
+        // 9. name_cannot_be_empty
+        println!("{}", name_cannot_be_empty());
+
+        // 10. not_cargo_workspace
+        println!("{}", not_cargo_workspace());
+
+        // 11. plugin_created_successfully
+        println!("{}", plugin_created_successfully("my-plugin"));
+
+        // 12. plugin_added_successfully
+        println!("{}", plugin_added_successfully("my-plugin"));
+
+        // 13. error_eprintln
+        println!("{}", error_eprintln("An unexpected error occurred"));
+
+        // 14. new_kovi_version_error
+        println!(
+            "{}",
+            new_kovi_version_error("v2.0.0", "Failed to install new version")
+        );
+
+        // 15. kovi_workspace_created_successfully
+        println!("{}", kovi_workspace_created_successfully("my-workspace"));
+
+        // 16. you_can
+        println!("{}", you_can());
+
+        // 17. next_steps_for_kovi_workspace
+        println!("{}", next_steps_for_kovi_workspace("my-workspace"));
+
+        // 18. try_add_plugin_from_crates_io
+        println!("{}", try_add_plugin_from_crates_io("my-plugin"));
+
+        // 19. add_local_plugin
+        println!("{}", add_local_plugin("my-local-plugin"));
+
+        // 20. to_something_cannot_be_empty
+        println!("{}", to_something_cannot_be_empty());
+
+        // 21. try_add_plugin_from_crates_io_to_local_plugin
+        println!(
+            "{}",
+            try_add_plugin_from_crates_io_to_local_plugin("my-plugin", "my-package")
+        );
+
+        // 22. plugin_directory_does_not_exist
+        println!("{}", plugin_directory_does_not_exist("/path/to/plugin"));
+
+        // 23. plugin_added_from_crates_io_successfully
+        println!("{}", plugin_added_from_crates_io_successfully("my-plugin"));
+
+        // 24. plugin_not_found_on_crates_io
+        println!("{}", plugin_not_found_on_crates_io("missing-plugin"));
+
+        // 25. plugin_local_added_successfully
+        println!("{}", plugin_local_added_successfully("my-local-plugin"));
     }
 }

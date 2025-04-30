@@ -1,3 +1,7 @@
+use crate::{
+    cli_update_successful, proceed_with_the_installation, update_get_latest_version_err,
+    update_has_new_version, update_using_the_latest_version,
+};
 use colored::Colorize;
 use std::{
     io::{self, Write},
@@ -6,13 +10,20 @@ use std::{
 
 use super::get_latest_version;
 
-#[cfg(not(windows))]
 pub fn update() {
-    use crate::{
-        cli_update_successful, proceed_with_the_installation, update_get_latest_version_err,
-        update_has_new_version, update_using_the_latest_version,
+    let new_version = match get_latest_version_and_eq_now_version() {
+        Some(v) => v,
+        None => return,
     };
 
+    #[cfg(not(windows))]
+    normal_update(&new_version);
+
+    #[cfg(windows)]
+    windows_update(&new_version);
+}
+
+fn get_latest_version_and_eq_now_version() -> Option<String> {
     let now_version = env!("CARGO_PKG_VERSION");
     let new_version = match get_latest_version("kovi-cli") {
         Ok(v) => v,
@@ -20,15 +31,22 @@ pub fn update() {
             let err = format!("{e}");
             let msg = update_get_latest_version_err(&err);
             eprintln!("{msg}");
-            return;
+            return None;
         }
     };
 
     if now_version == new_version {
         let msg = update_using_the_latest_version(&new_version);
         println!("\n{}", msg.truecolor(202, 225, 205),);
-        return;
+        return None;
     }
+
+    Some(new_version)
+}
+
+#[cfg(not(windows))]
+pub fn normal_update(new_version: &str) {
+    use crate::{cargo_exited_with_status, failed_to_execute_cargo};
 
     {
         let update_has_new_version = update_has_new_version();
@@ -36,10 +54,8 @@ pub fn update() {
 
         // [Y/n] 确认
         print!(
-            "{}\n{}\n:: {} [Y/n]",
-            update_has_new_version,
+            "{update_has_new_version}\n{}\n:: {proceed_with_the_installation} [Y/n]",
             format!("({new_version})").truecolor(202, 225, 205),
-            proceed_with_the_installation
         );
     }
     io::stdout().flush().unwrap();
@@ -62,47 +78,33 @@ pub fn update() {
     match cargo_command.status() {
         Ok(status) if status.success() => {
             let msg = cli_update_successful();
-
-            println!("\n{}", "msg".truecolor(202, 225, 205),);
+            println!("\n{}", msg.truecolor(202, 225, 205),);
         }
         Ok(status) => {
-            eprintln!("Cargo exited with status: {}", status);
+            let str = format!("{status}");
+            let msg = cargo_exited_with_status(&str);
+            eprintln!("{msg}");
         }
         Err(e) => {
-            eprintln!("Failed to execute cargo: {}", e);
+            let msg = failed_to_execute_cargo(&e.to_string());
+            eprintln!("{msg}");
         }
     }
 }
 
 #[cfg(windows)]
-pub fn update() {
-    let now_version = env!("CARGO_PKG_VERSION");
-    let new_version = match get_latest_version("kovi-cli") {
-        Ok(v) => v,
-        Err(e) => {
-            eprintln!(
-                "Failed to get latest version: {}, please check your network connection.",
-                e
-            );
-            return;
-        }
-    };
+pub fn windwos_update(new_version: &str) {
+    use crate::update_windows_manually_to_use;
 
-    if now_version == new_version {
-        println!(
-            "\n{}",
-            format!("You are using the latest version ({new_version}) of Kovi cli.")
-                .truecolor(202, 225, 205),
-        );
-        return;
-    }
+    let update_has_new_version = update_has_new_version();
 
     println!(
-        "There is a new version of kovi-cli\n{}",
+        "{update_has_new_version}\n{}",
         format!("({new_version})").truecolor(202, 225, 205)
     );
 
-    println!("\nSorry");
-    println!("On Windows, please manually update by running:");
+    let msg = update_windows_manually_to_use();
+
+    println!("\n{msg}");
     println!("    cargo install kovi-cli");
 }

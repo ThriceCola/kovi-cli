@@ -1,4 +1,8 @@
-use crate::cmd::{get_latest_version, DEFAULT_MAIN_CODE, KOVI_DEFAULT_VERSION};
+use crate::cmd::{DEFAULT_MAIN_CODE, KOVI_DEFAULT_VERSION, get_latest_version};
+use crate::{
+    cargo_exited_with_status, failed_to_execute_cargo, kovi_workspace_created_successfully,
+    new_kovi_version_error, next_steps_for_kovi_workspace, you_can,
+};
 use colored::Colorize;
 use std::io::Write;
 use std::path::Path;
@@ -28,10 +32,8 @@ pub fn new_kovi(name: String, version: Option<String>) {
                     Err(e) => {
                         let v = KOVI_DEFAULT_VERSION.to_string();
                         //报错获取失败，使用默认版本
-                        eprintln!(
-                            "Failed to get latest version: {}\nUse default version: {}",
-                            e, v
-                        );
+                        let msg = new_kovi_version_error(&v, &e.to_string());
+                        eprintln!("{msg}");
                         v
                     }
                 },
@@ -55,26 +57,32 @@ pub fn new_kovi(name: String, version: Option<String>) {
                 .open(main_path)
                 .expect("Failed to open lib.rs");
 
-
             main_rs
                 .write_all(DEFAULT_MAIN_CODE.as_bytes())
                 .expect("Failed to write to lib.rs");
 
-
             #[allow(clippy::format_in_format_args)]
             {
+                let kovi_workspace_created_successfully =
+                    kovi_workspace_created_successfully(&name).truecolor(202, 225, 205);
+                let you_can = you_can();
+                let next_steps_for_kovi_bot =
+                    next_steps_for_kovi_workspace(&name).truecolor(202, 225, 205);
+
                 println!(
-                    "\n{}\nYou can:\n{}",
-                    format!("KoviBot '{}' created successfully!", name).truecolor(202, 225, 205),
-                    format!("cd ./{}\ncargo kovi create <NAME>", name).truecolor(202, 225, 205),
+                    "\n{kovi_workspace_created_successfully}\n{you_can}\n{next_steps_for_kovi_bot}",
                 );
             }
         }
         Ok(status) => {
-            eprintln!("Cargo exited with status: {}", status);
+            let status = format!("{}", status);
+            let msg = cargo_exited_with_status(&status);
+            eprintln!("{msg}");
         }
         Err(e) => {
-            eprintln!("Failed to execute cargo: {}", e);
+            let e = e.to_string();
+            let msg = failed_to_execute_cargo(&e);
+            eprintln!("{msg}");
         }
     }
 }

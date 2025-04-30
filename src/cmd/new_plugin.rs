@@ -1,5 +1,12 @@
+use crate::cargo_exited_with_status;
 use crate::cmd::DEFAULT_PLUGIN_CODE;
 use crate::cmd::SIMPLE_PLUGIN_CODE;
+use crate::error_eprintln;
+use crate::failed_to_execute_cargo;
+use crate::name_cannot_be_empty;
+use crate::not_cargo_workspace;
+use crate::plugin_added_successfully;
+use crate::plugin_created_successfully;
 use colored::Colorize;
 use std::io::Read;
 use std::io::Write;
@@ -8,7 +15,8 @@ use std::process::Command;
 
 pub fn new_plugin(name: String, simple: bool, prefix: bool) {
     if name.is_empty() {
-        eprintln!("Name cannot be empty");
+        let msg = name_cannot_be_empty();
+        eprintln!("{msg}");
         return;
     }
 
@@ -33,7 +41,8 @@ pub fn new_plugin(name: String, simple: bool, prefix: bool) {
             .unwrap_or_else(|e| exit_and_eprintln(e));
 
         if !contents.contains("[workspace]") {
-            eprintln!("This is not a workspace");
+            let msg = not_cargo_workspace();
+            eprintln!("{msg}");
             return;
         }
     }
@@ -70,38 +79,43 @@ pub fn new_plugin(name: String, simple: bool, prefix: bool) {
                 writeln!(cargo_toml, "kovi.workspace = true")
                     .unwrap_or_else(|e| exit_and_eprintln(e));
 
-                println!(
-                    "\n{}",
-                    format!("Plugin '{}' created successfully!", name).truecolor(202, 225, 205),
-                );
+                let msg = plugin_created_successfully(&name);
+                let msg = msg.truecolor(202, 225, 205);
+                println!("\n{msg}");
             }
             Ok(status) => {
-                eprintln!("Cargo exited with status: {}", status);
+                let status = format!("{}", status);
+                let msg = cargo_exited_with_status(&status);
+                eprintln!("{msg}");
                 return;
             }
             Err(e) => {
-                eprintln!("Failed to execute cargo: {}", e);
+                let e = e.to_string();
+                let msg = failed_to_execute_cargo(&e);
+                eprintln!("{msg}");
                 return;
             }
         }
     }
-
 
     let mut cargo_command = Command::new("cargo");
     cargo_command.arg("add").arg("--path").arg(plugin_path);
 
     match cargo_command.status() {
         Ok(status) if status.success() => {
-            println!(
-                "\n{}",
-                format!("Plugin '{}' add successfully!", name).truecolor(202, 225, 205),
-            );
+            let msg = plugin_added_successfully(&name);
+            let msg = msg.truecolor(202, 225, 205);
+            println!("\n{msg}");
         }
         Ok(status) => {
-            eprintln!("Cargo exited with status: {}", status);
+            let status = format!("{}", status);
+            let msg = cargo_exited_with_status(&status);
+            eprintln!("{msg}");
         }
         Err(e) => {
-            eprintln!("Failed to execute cargo: {}", e);
+            let e = e.to_string();
+            let msg = failed_to_execute_cargo(&e);
+            eprintln!("{msg}");
         }
     }
 }
@@ -110,6 +124,7 @@ fn exit_and_eprintln<E>(e: E) -> !
 where
     E: std::fmt::Display,
 {
-    eprintln!("Error: {e}");
+    let msg = error_eprintln(&e.to_string());
+    eprintln!("{msg}");
     std::process::exit(0);
 }
