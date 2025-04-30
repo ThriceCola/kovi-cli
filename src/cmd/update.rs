@@ -37,7 +37,7 @@ fn get_latest_version_and_eq_now_version() -> Option<String> {
 
     if now_version == new_version {
         let msg = update_using_the_latest_version(&new_version);
-        println!("\n{}", msg.truecolor(202, 225, 205),);
+        println!("\n{}", msg.green(),);
         return None;
     }
 
@@ -46,7 +46,7 @@ fn get_latest_version_and_eq_now_version() -> Option<String> {
 
 #[cfg(not(windows))]
 pub fn normal_update(new_version: &str) {
-    use crate::{cargo_exited_with_status, failed_to_execute_cargo};
+    use crate::run_cargo_command_return;
 
     {
         let update_has_new_version = update_has_new_version();
@@ -55,7 +55,7 @@ pub fn normal_update(new_version: &str) {
         // [Y/n] 确认
         print!(
             "{update_has_new_version}\n{}\n:: {proceed_with_the_installation} [Y/n]",
-            format!("({new_version})").truecolor(202, 225, 205),
+            format!("({new_version})").green(),
         );
     }
     io::stdout().flush().unwrap();
@@ -75,21 +75,10 @@ pub fn normal_update(new_version: &str) {
     let mut cargo_command = Command::new("cargo");
     cargo_command.arg("install").arg("kovi-cli");
 
-    match cargo_command.status() {
-        Ok(status) if status.success() => {
-            let msg = cli_update_successful();
-            println!("\n{}", msg.truecolor(202, 225, 205),);
-        }
-        Ok(status) => {
-            let str = format!("{status}");
-            let msg = cargo_exited_with_status(&str);
-            eprintln!("{msg}");
-        }
-        Err(e) => {
-            let msg = failed_to_execute_cargo(&e.to_string());
-            eprintln!("{msg}");
-        }
-    }
+    run_cargo_command_return!(cargo_command);
+
+    let msg = cli_update_successful();
+    println!("\n{}", msg.green(),);
 }
 
 #[cfg(windows)]
@@ -100,7 +89,7 @@ pub fn windwos_update(new_version: &str) {
 
     println!(
         "{update_has_new_version}\n{}",
-        format!("({new_version})").truecolor(202, 225, 205)
+        format!("({new_version})").green()
     );
 
     let msg = update_windows_manually_to_use();

@@ -53,3 +53,11 @@ plugin-added-from-crates-io-successfully = 从 crates.io 添加插件 '{ $name }
 plugin-not-found-on-crates-io = 在 crates.io 上找不到插件 '{ $name }'。
 
 plugin-local-added-successfully = 从本地添加插件 '{ $name }' 成功！
+
+simple-handler-name-not-specified = 由于您没有指定名称，使用默认名称：
+
+you-specified-this-name-for-kovi-workspace = 您为 Kovi 工作区指定了名称：
+
+what-is-the-name-of-the-kovi-workspace = 请输入 Kovi 工作区的名称
+
+are-you-want-to-add-message-command-plugins  = 是否要为 Kovi 工作区添加消息命令插件（ kovi-plugin-cmd ）？

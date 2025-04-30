@@ -53,3 +53,11 @@ plugin-added-from-crates-io-successfully = Plugin '{ $name }' from crates.io add
 plugin-not-found-on-crates-io = Plugin '{ $name }' not found on crates.io.
 
 plugin-local-added-successfully = Plugin '{ $name }' from local add successfully!
+
+simple-handler-name-not-specified = Name not specified, so use default name:
+
+you-specified-this-name-for-kovi-workspace = You specified this name for kovi workspace:
+
+what-is-the-name-of-the-kovi-workspace = What is the name of the kovi workspace?
+
+are-you-want-to-add-message-command-plugins  = Are you want to add message command plugins( kovi-plugin-cmd )?

@@ -9,6 +9,7 @@ use cmd::{
 
 mod cmd;
 mod locales;
+mod utils;
 
 pub(crate) use locales::*;
 
@@ -46,11 +47,11 @@ enum KoviCommands {
         about = "Creates a new Kovi project with a default or specified name and an optional version."
     )]
     New {
-        #[arg(default_value = "kovi-bot")]
-        name: String,
+        #[arg()]
+        name: Option<String>,
 
-        #[arg(short, long)]
-        version: Option<String>,
+        #[arg(short, long, help = "Non guided approach")]
+        simple: bool,
     },
 
     #[command(
@@ -77,7 +78,7 @@ fn main() {
             simple,
             prefix,
         } => new_plugin(name, simple, prefix),
-        KoviCommands::New { name, version } => new_kovi(name, version),
+        KoviCommands::New { name, simple } => new_kovi(name, simple),
         KoviCommands::Add { name, package } => match package {
             Some(package) => add_to(name, package),
             None => add(name),

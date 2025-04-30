@@ -199,6 +199,30 @@ pub(crate) fn plugin_local_added_successfully(name: &str) -> Cow<'static, str> {
         .unwrap()
 }
 
+pub(crate) fn simple_handler_name_not_specified() -> Cow<'static, str> {
+    LOCALE
+        .message("simple-handler-name-not-specified", None)
+        .unwrap()
+}
+
+pub(crate) fn you_specified_this_name_for_kovi_workspace() -> Cow<'static, str> {
+    LOCALE
+        .message("you-specified-this-name-for-kovi-workspace", None)
+        .unwrap()
+}
+
+pub(crate) fn what_is_the_name_of_the_kovi_workspace() -> Cow<'static, str> {
+    LOCALE
+        .message("what-is-the-name-of-the-kovi-workspace", None)
+        .unwrap()
+}
+
+pub(crate) fn are_you_want_to_add_message_command_plugins() -> Cow<'static, str> {
+    LOCALE
+        .message("are-you-want-to-add-message-command-plugins", None)
+        .unwrap()
+}
+
 static LOCALES_EN_US: &str = include_str!("../locales/en-US.ftl");
 
 static LOCALES_ZH_CN: &str = include_str!("../locales/zh-CN.ftl");
@@ -299,18 +323,6 @@ mod tests {
     }
 
     #[test]
-    fn test_get_message() {
-        let msg = LOCALE
-            .message(
-                "updete-get-latest-version-err",
-                Some(&LocaleArgs::new().set("error", "i am error")),
-            )
-            .unwrap();
-
-        println!("{msg}",);
-    }
-
-    #[test]
     fn test_print_local() {
         // 1. update_get_latest_version_err
         println!(
@@ -395,5 +407,17 @@ mod tests {
 
         // 25. plugin_local_added_successfully
         println!("{}", plugin_local_added_successfully("my-local-plugin"));
+
+        // 26. simple_handler_name_not_specified
+        println!("{}", simple_handler_name_not_specified());
+
+        // 27. you_specified_this_name_for_kovi_workspace
+        println!("{}", you_specified_this_name_for_kovi_workspace());
+
+        // 28. what_is_the_name_of_the_kovi_workspace
+        println!("{}", what_is_the_name_of_the_kovi_workspace());
+
+        // 29. are_you_want_to_add_message_command_plugins
+        println!("{}", are_you_want_to_add_message_command_plugins());
     }
 }

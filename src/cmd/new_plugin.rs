@@ -1,12 +1,11 @@
-use crate::cargo_exited_with_status;
 use crate::cmd::DEFAULT_PLUGIN_CODE;
 use crate::cmd::SIMPLE_PLUGIN_CODE;
 use crate::error_eprintln;
-use crate::failed_to_execute_cargo;
 use crate::name_cannot_be_empty;
 use crate::not_cargo_workspace;
 use crate::plugin_added_successfully;
 use crate::plugin_created_successfully;
+use crate::run_cargo_command_return;
 use colored::Colorize;
 use std::io::Read;
 use std::io::Write;
@@ -47,77 +46,51 @@ pub fn new_plugin(name: String, simple: bool, prefix: bool) {
         }
     }
 
+    // 运行cargo new --lib命令
     {
         let mut cargo_command = Command::new("cargo");
         cargo_command.arg("new").arg(&plugin_path).arg("--lib");
 
-        match cargo_command.status() {
-            Ok(status) if status.success() => {
-                let lib_rs_path = plugin_path.join("src").join("lib.rs");
-                let mut lib_rs = std::fs::OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open(lib_rs_path)
-                    .unwrap_or_else(|e| exit_and_eprintln(e));
+        run_cargo_command_return!(cargo_command);
 
-                if simple {
-                    lib_rs
-                        .write_all(SIMPLE_PLUGIN_CODE.as_bytes())
-                        .unwrap_or_else(|e| exit_and_eprintln(e));
-                } else {
-                    lib_rs
-                        .write_all(DEFAULT_PLUGIN_CODE.as_bytes())
-                        .unwrap_or_else(|e| exit_and_eprintln(e));
-                }
+        let lib_rs_path = plugin_path.join("src").join("lib.rs");
+        let mut lib_rs = std::fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(lib_rs_path)
+            .unwrap_or_else(|e| exit_and_eprintln(e));
 
-                let cargo_toml_path = plugin_path.join("Cargo.toml");
-                let mut cargo_toml = std::fs::OpenOptions::new()
-                    .append(true)
-                    .open(cargo_toml_path)
-                    .unwrap_or_else(|e| exit_and_eprintln(e));
-
-                writeln!(cargo_toml, "kovi.workspace = true")
-                    .unwrap_or_else(|e| exit_and_eprintln(e));
-
-                let msg = plugin_created_successfully(&name);
-                let msg = msg.truecolor(202, 225, 205);
-                println!("\n{msg}");
-            }
-            Ok(status) => {
-                let status = format!("{}", status);
-                let msg = cargo_exited_with_status(&status);
-                eprintln!("{msg}");
-                return;
-            }
-            Err(e) => {
-                let e = e.to_string();
-                let msg = failed_to_execute_cargo(&e);
-                eprintln!("{msg}");
-                return;
-            }
+        if simple {
+            lib_rs
+                .write_all(SIMPLE_PLUGIN_CODE.as_bytes())
+                .unwrap_or_else(|e| exit_and_eprintln(e));
+        } else {
+            lib_rs
+                .write_all(DEFAULT_PLUGIN_CODE.as_bytes())
+                .unwrap_or_else(|e| exit_and_eprintln(e));
         }
+
+        let cargo_toml_path = plugin_path.join("Cargo.toml");
+        let mut cargo_toml = std::fs::OpenOptions::new()
+            .append(true)
+            .open(cargo_toml_path)
+            .unwrap_or_else(|e| exit_and_eprintln(e));
+
+        writeln!(cargo_toml, "kovi.workspace = true").unwrap_or_else(|e| exit_and_eprintln(e));
+
+        let msg = plugin_created_successfully(&name);
+        let msg = msg.green();
+        println!("\n{msg}");
     }
 
     let mut cargo_command = Command::new("cargo");
     cargo_command.arg("add").arg("--path").arg(plugin_path);
 
-    match cargo_command.status() {
-        Ok(status) if status.success() => {
-            let msg = plugin_added_successfully(&name);
-            let msg = msg.truecolor(202, 225, 205);
-            println!("\n{msg}");
-        }
-        Ok(status) => {
-            let status = format!("{}", status);
-            let msg = cargo_exited_with_status(&status);
-            eprintln!("{msg}");
-        }
-        Err(e) => {
-            let e = e.to_string();
-            let msg = failed_to_execute_cargo(&e);
-            eprintln!("{msg}");
-        }
-    }
+    run_cargo_command_return!(cargo_command);
+
+    let msg = plugin_added_successfully(&name);
+    let msg = msg.green();
+    println!("\n{msg}");
 }
 
 fn exit_and_eprintln<E>(e: E) -> !
