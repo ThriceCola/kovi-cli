@@ -1,13 +1,13 @@
 [package]
 name = "kovi-cli"
-version = "0.7.0"
+version = "0.7.1"
 edition = "2024"
 description = "kovi cli"
 license = "MPL-2.0"
-authors = ["Threkork <threkork@hotmail.com>"]
-repository = "https://github.com/Threkork/Kovi"
+authors = ["ThriceCola <thricecola@hotmail.com>"]
+repository = "https://github.com/ThriceCola/Kovi"
 readme = "README.md"
-documentation = "https://threkork.github.io/kovi-doc/"
+documentation = "https://thricecola.github.io/kovi-doc/"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive", "unstable-doc"] }

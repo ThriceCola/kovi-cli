@@ -82,7 +82,7 @@ pub fn normal_update(new_version: &str) {
 }
 
 #[cfg(windows)]
-pub fn windwos_update(new_version: &str) {
+pub fn windows_update(new_version: &str) {
     use crate::update_windows_manually_to_use;
 
     let update_has_new_version = update_has_new_version();
