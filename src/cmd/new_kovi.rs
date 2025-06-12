@@ -44,7 +44,7 @@ fn guided(name: Option<String>) {
         }
     };
 
-    // 是否查看更多可选选项
+    // 是否增加消息命令插件
     let is_add_cmd_plugin: bool = {
         let msg = are_you_want_to_add_message_command_plugins();
         let msg = format!("{msg}");
