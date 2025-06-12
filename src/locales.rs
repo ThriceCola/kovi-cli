@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 use anyhow::{Result, anyhow};
 use fluent::concurrent::FluentBundle;
 use fluent::{FluentArgs, FluentResource};

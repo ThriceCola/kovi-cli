@@ -1,6 +1,7 @@
+#[cfg(not(windows))]
+use crate::{cli_update_successful, proceed_with_the_installation};
 use crate::{
-    cli_update_successful, proceed_with_the_installation, update_get_latest_version_err,
-    update_has_new_version, update_using_the_latest_version,
+    update_get_latest_version_err, update_has_new_version, update_using_the_latest_version,
 };
 use colored::Colorize;
 use std::{

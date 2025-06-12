@@ -1,0 +1,2 @@
+[target.'cfg(target_os = "windows")']
+rustflags = ["-A", "dead_code", "-A", "unused_imports"]

@@ -26,3 +26,6 @@ dialoguer = { version = "0.11", features = ["fuzzy-select"] }
 [[bin]]
 name = "cargo-kovi"
 path = "src/main.rs"
+
+[target.'cfg(target_os = "windows")']
+rustflags = ["-A", "dead_code", "-A", "unused_imports"]
