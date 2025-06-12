@@ -122,12 +122,6 @@ fn cargo_new_kovi(name: &str, is_add_cmd_plugin: bool) {
         .expect("Failed to open main.rs");
 
     if is_add_cmd_plugin {
-        let mut cargo_command = Command::new("cargo");
-        cargo_command.current_dir(format!("./{}", name));
-        cargo_command.arg("add").arg("kovi-plugin-cmd");
-
-        run_cargo_command_return!(cargo_command);
-
         main_rs
             .write_all(DEFAULT_MAIN_CODE_HAS_CMD.as_bytes())
             .expect("Failed to write to main.rs");
@@ -137,9 +131,19 @@ fn cargo_new_kovi(name: &str, is_add_cmd_plugin: bool) {
             .expect("Failed to write to main.rs");
     }
 
+    drop(cargo_toml);
+    drop(main_rs);
+
+    if is_add_cmd_plugin {
+        let mut cargo_command = Command::new("cargo");
+        cargo_command.current_dir(format!("./{}", name));
+        cargo_command.arg("add").arg("kovi-plugin-cmd");
+
+        run_cargo_command_return!(cargo_command);
+    }
+
     let kovi_workspace_created_successfully = kovi_workspace_created_successfully(name).green();
     let you_can = you_can();
     let next_steps_for_kovi_bot = next_steps_for_kovi_workspace(name);
-
     println!("\n{kovi_workspace_created_successfully}\n{you_can}\n{next_steps_for_kovi_bot}",);
 }

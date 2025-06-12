@@ -308,9 +308,81 @@ fn init_fluent() -> FluentBundle<FluentResource> {
 }
 
 fn get_system_locale() -> String {
-    env::var("LC_ALL")
-        .or_else(|_| env::var("LANG"))
-        .unwrap_or_else(|_| "en-US".to_string())
+    // 首先尝试标准的 Unix 环境变量
+    if let Ok(locale) = env::var("LC_ALL") {
+        return locale;
+    }
+
+    if let Ok(locale) = env::var("LANG") {
+        return locale;
+    }
+
+    // Windows 系统特有的处理
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(locale) = get_windows_locale() {
+            return locale;
+        }
+    }
+
+    "en-US".to_string()
+}
+
+#[cfg(target_os = "windows")]
+fn get_windows_locale() -> Option<String> {
+    use std::process::Command;
+
+    // 尝试使用 PowerShell 获取系统语言
+    if let Ok(output) = Command::new("powershell")
+        .args(&[
+            "-NoProfile",
+            "-Command",
+            "Get-Culture | Select-Object -ExpandProperty Name",
+        ])
+        .output()
+    {
+        if output.status.success() {
+            let locale_str = String::from_utf8_lossy(&output.stdout);
+            let locale_str = locale_str.trim();
+            if !locale_str.is_empty() {
+                return Some(locale_str.to_string());
+            }
+        }
+    }
+
+    // 如果 PowerShell 失败，尝试使用 wmic
+    if let Ok(output) = Command::new("wmic")
+        .args(&["os", "get", "locale", "/value"])
+        .output()
+    {
+        if output.status.success() {
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            for line in output_str.lines() {
+                if line.starts_with("Locale=") {
+                    let locale_code = line.strip_prefix("Locale=").unwrap_or("").trim();
+                    if !locale_code.is_empty() {
+                        // 将 Windows 语言代码转换为标准格式
+                        return Some(convert_windows_locale_code(locale_code));
+                    }
+                }
+            }
+        }
+    }
+
+    None
+}
+
+#[cfg(target_os = "windows")]
+fn convert_windows_locale_code(code: &str) -> String {
+    // 将常见的 Windows 语言代码转换为标准格式
+    match code {
+        "0804" => "zh-CN".to_string(), // 中文(简体)
+        "0404" => "zh-CN".to_string(), // 中文(繁体)
+        _ => {
+            // 如果是未知代码，返回默认值
+            "en-US".to_string()
+        }
+    }
 }
 
 #[cfg(test)]
@@ -419,5 +491,62 @@ mod tests {
 
         // 29. are_you_want_to_add_message_command_plugins
         println!("{}", are_you_want_to_add_message_command_plugins());
+    }
+
+    #[test]
+    fn test_get_system_locale() {
+        // 测试基本功能，这应该不会崩溃
+        let locale = get_system_locale();
+        assert!(!locale.is_empty());
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn test_convert_windows_locale_code() {
+        // 测试常见的 Windows 语言代码转换
+        assert_eq!(convert_windows_locale_code("0804"), "zh-CN");
+        assert_eq!(convert_windows_locale_code("0404"), "zh-TW");
+        assert_eq!(convert_windows_locale_code("0409"), "en-US");
+        assert_eq!(convert_windows_locale_code("0809"), "en-GB");
+        assert_eq!(convert_windows_locale_code("0411"), "ja-JP");
+        assert_eq!(convert_windows_locale_code("0412"), "ko-KR");
+        assert_eq!(convert_windows_locale_code("040c"), "fr-FR");
+        assert_eq!(convert_windows_locale_code("0407"), "de-DE");
+        assert_eq!(convert_windows_locale_code("0410"), "it-IT");
+        assert_eq!(convert_windows_locale_code("0c0a"), "es-ES");
+        assert_eq!(convert_windows_locale_code("0416"), "pt-BR");
+        assert_eq!(convert_windows_locale_code("0419"), "ru-RU");
+
+        // 测试未知代码
+        assert_eq!(convert_windows_locale_code("9999"), "en-US");
+        assert_eq!(convert_windows_locale_code(""), "en-US");
+    }
+
+    #[test]
+    fn test_locale_context_message() {
+        let context = LocaleContext::init();
+
+        // 测试一个已知的消息
+        let result = context.message("name-cannot-be-empty", None);
+        assert!(result.is_ok());
+
+        // 测试不存在的消息
+        let result = context.message("non-existent-message", None);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_locale_args() {
+        let args = LocaleArgs::new()
+            .set("name", "test-plugin")
+            .set("version", "1.0.0");
+
+        // 验证 LocaleArgs 可以正常创建和使用
+        let context = LocaleContext::init();
+        let result = context.message("plugin-created-successfully", Some(&args));
+        assert!(result.is_ok());
+
+        let message = result.unwrap();
+        assert!(message.contains("test-plugin"));
     }
 }
