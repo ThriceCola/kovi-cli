@@ -60,4 +60,6 @@ you-specified-this-name-for-kovi-workspace = You specified this name for kovi wo
 
 what-is-the-name-of-the-kovi-workspace = What is the name of the kovi workspace?
 
+which-driver-to-use = Which driver/protocol to use?
+
 are-you-want-to-add-message-command-plugins  = Are you want to add message command plugins( kovi-plugin-cmd )?

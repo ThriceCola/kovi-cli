@@ -1,53 +1,101 @@
 use crate::cmd::{
-    DEFAULT_MAIN_CODE, DEFAULT_MAIN_CODE_HAS_CMD, KOVI_DEFAULT_VERSION, get_latest_version,
+    DRIVER_NAMES, DriverKind, KOVI_DEFAULT_VERSION, driver_crate_name, get_latest_version,
+    main_code_13,
 };
 
 use crate::{
     are_you_want_to_add_message_command_plugins, kovi_workspace_created_successfully,
     new_kovi_version_error, next_steps_for_kovi_workspace, run_cargo_command_return,
-    simple_handler_name_not_specified, what_is_the_name_of_the_kovi_workspace, you_can,
+    what_is_the_name_of_the_kovi_workspace, which_driver_to_use, you_can,
     you_specified_this_name_for_kovi_workspace,
 };
 use colored::Colorize;
 use dialoguer::theme::ColorfulTheme;
 use dialoguer::{Input, Select};
-use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 
 const DEFAULT_KOVI_NAME: &str = "kovi-bot";
 
-pub fn new_kovi(name: Option<String>, simple: bool) {
+pub fn new_kovi(name: Option<String>, simple: bool, driver_arg: Option<String>, cmd_arg: bool) {
+    let name = resolve_name(name, simple);
+    let (driver, add_cmd) = resolve_driver_and_cmd(simple, driver_arg, cmd_arg, &name);
+    cargo_new_kovi(&name, driver, add_cmd);
+}
+
+fn resolve_name(name: Option<String>, simple: bool) -> String {
     if simple {
-        simple_handler(name)
+        name.unwrap_or_else(|| {
+            let msg = crate::simple_handler_name_not_specified();
+            println!("{} {}", msg.yellow(), DEFAULT_KOVI_NAME);
+            DEFAULT_KOVI_NAME.to_string()
+        })
     } else {
-        guided(name)
+        match name {
+            Some(name) => {
+                let msg = you_specified_this_name_for_kovi_workspace();
+                println!("{msg} {}", name.green());
+                name
+            }
+            None => {
+                let msg = what_is_the_name_of_the_kovi_workspace();
+                Input::with_theme(&ColorfulTheme::default())
+                    .with_prompt(msg.to_string())
+                    .default(DEFAULT_KOVI_NAME.to_string())
+                    .interact_text()
+                    .unwrap()
+            }
+        }
     }
 }
 
-fn guided(name: Option<String>) {
-    let name = match name {
-        Some(name) => {
-            let msg = you_specified_this_name_for_kovi_workspace();
-            println!("{msg} {}", name.green());
-            name
+/// Resolves driver and cmd-plugin flags. Prompts interactively when not specified via CLI.
+fn resolve_driver_and_cmd(
+    simple: bool,
+    driver_arg: Option<String>,
+    cmd_arg: bool,
+    _name: &str,
+) -> (DriverKind, bool) {
+    let driver = if simple {
+        match driver_arg.as_deref() {
+            Some("onebot") => DriverKind::OneBot,
+            _ => DriverKind::Milky,
         }
-        None => {
-            let msg = what_is_the_name_of_the_kovi_workspace();
-            let msg = format!("{msg}");
-            let name: String = Input::with_theme(&ColorfulTheme::default())
-                .with_prompt(msg)
-                .default(DEFAULT_KOVI_NAME.to_string())
-                .interact_text()
-                .unwrap();
-            name
+    } else {
+        match driver_arg.as_deref() {
+            Some("milky") => {
+                println!("{} milky", which_driver_to_use().green());
+                DriverKind::Milky
+            }
+            Some("onebot") => {
+                println!("{} onebot", which_driver_to_use().green());
+                DriverKind::OneBot
+            }
+            None => {
+                let msg = which_driver_to_use();
+                let select = Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt(msg)
+                    .items(DRIVER_NAMES)
+                    .default(0)
+                    .interact()
+                    .unwrap();
+
+                match select {
+                    0 => DriverKind::Milky,
+                    1 => DriverKind::OneBot,
+                    _ => unreachable!(),
+                }
+            }
+            _ => unreachable!(),
         }
     };
 
-    // 是否增加消息命令插件
-    let is_add_cmd_plugin: bool = {
+    let add_cmd = if cmd_arg {
+        true
+    } else if simple {
+        false
+    } else {
         let msg = are_you_want_to_add_message_command_plugins();
-        let msg = format!("{msg}");
         let items = ["Yes", "No"];
         let select = Select::with_theme(&ColorfulTheme::default())
             .with_prompt(msg)
@@ -63,21 +111,10 @@ fn guided(name: Option<String>) {
         }
     };
 
-    cargo_new_kovi(&name, is_add_cmd_plugin);
+    (driver, add_cmd)
 }
 
-fn simple_handler(name: Option<String>) {
-    let name = name.unwrap_or_else(|| {
-        let name = DEFAULT_KOVI_NAME.to_string();
-        let msg = simple_handler_name_not_specified().yellow();
-        println!("{msg} {name}");
-        name
-    });
-
-    cargo_new_kovi(&name, false);
-}
-
-fn cargo_new_kovi(name: &str, is_add_cmd_plugin: bool) {
+pub fn cargo_new_kovi(name: &str, driver: DriverKind, is_add_cmd_plugin: bool) {
     let mut cargo_command = Command::new("cargo");
     cargo_command.arg("new").arg(name);
 
@@ -87,12 +124,6 @@ fn cargo_new_kovi(name: &str, is_add_cmd_plugin: bool) {
     let path = Path::new(&path);
 
     let cargo_path = path.join("Cargo.toml");
-
-    //给Cargo.toml加入Kovi依赖
-    let mut cargo_toml = std::fs::OpenOptions::new()
-        .append(true)
-        .open(cargo_path)
-        .expect("Failed to open Cargo.toml");
 
     let version = match get_latest_version("kovi") {
         Ok(v) => v,
@@ -105,39 +136,36 @@ fn cargo_new_kovi(name: &str, is_add_cmd_plugin: bool) {
         }
     };
 
-    writeln!(cargo_toml, "kovi = \"{}\"", version).expect("Failed to write to Cargo.toml");
+    let driver_crate = driver_crate_name(driver);
 
-    writeln!(
-        cargo_toml,
-        "\n[workspace]\n\n[workspace.dependencies]\nkovi = \"{version}\""
-    )
-    .expect("Failed to write to Cargo.toml");
+    // 读取已有 Cargo.toml，追加依赖和 workspace
+    let mut cargo_content =
+        std::fs::read_to_string(&cargo_path).expect("Failed to read Cargo.toml");
 
-    // 清空src/main.rs，然后传入默认的代码
+    cargo_content.push_str(&format!(
+        "\nkovi = \"{version}\"\n{driver_crate} = \"{version}\"\n\n[workspace]\n\n[workspace.dependencies]\nkovi = \"{version}\"\n{driver_crate} = \"{version}\"\n"
+    ));
+
+    std::fs::write(&cargo_path, &cargo_content).expect("Failed to write Cargo.toml");
+
+    // 写入 src/main.rs（0.13 异步驱动模式）
     let main_path = path.join("src/main.rs");
-    let mut main_rs = std::fs::OpenOptions::new()
-        .write(true)
-        .truncate(true)
-        .open(main_path)
-        .expect("Failed to open main.rs");
+    let main_code = main_code_13(driver, is_add_cmd_plugin);
+    std::fs::write(&main_path, main_code).expect("Failed to write to main.rs");
 
     if is_add_cmd_plugin {
-        main_rs
-            .write_all(DEFAULT_MAIN_CODE_HAS_CMD.as_bytes())
-            .expect("Failed to write to main.rs");
-    } else {
-        main_rs
-            .write_all(DEFAULT_MAIN_CODE.as_bytes())
-            .expect("Failed to write to main.rs");
-    }
+        let driver_feature = match driver {
+            DriverKind::Milky => "milky",
+            DriverKind::OneBot => "onebot",
+        };
 
-    drop(cargo_toml);
-    drop(main_rs);
-
-    if is_add_cmd_plugin {
         let mut cargo_command = Command::new("cargo");
-        cargo_command.current_dir(format!("./{}", name));
-        cargo_command.arg("add").arg("kovi-plugin-cmd");
+        cargo_command.current_dir(path);
+        cargo_command
+            .arg("add")
+            .arg("kovi-plugin-cmd")
+            .arg("--features")
+            .arg(driver_feature);
 
         run_cargo_command_return!(cargo_command);
     }

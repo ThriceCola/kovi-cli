@@ -2,7 +2,9 @@
 use anyhow::{Result, anyhow};
 use fluent::concurrent::FluentBundle;
 use fluent::{FluentArgs, FluentResource};
-use std::{borrow::Cow, env, sync::LazyLock};
+use std::borrow::Cow;
+use std::env;
+use std::sync::LazyLock;
 use unic_langid::langid;
 
 pub(crate) fn update_get_latest_version_err(err: &str) -> Cow<'static, str> {
@@ -216,6 +218,10 @@ pub(crate) fn what_is_the_name_of_the_kovi_workspace() -> Cow<'static, str> {
     LOCALE
         .message("what-is-the-name-of-the-kovi-workspace", None)
         .unwrap()
+}
+
+pub(crate) fn which_driver_to_use() -> Cow<'static, str> {
+    LOCALE.message("which-driver-to-use", None).unwrap()
 }
 
 pub(crate) fn are_you_want_to_add_message_command_plugins() -> Cow<'static, str> {

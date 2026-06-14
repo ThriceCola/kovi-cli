@@ -1,11 +1,9 @@
 use clap::{Parser, Subcommand};
 use clap_cargo::style::CLAP_STYLING;
-use cmd::{
-    add::{add, add_to},
-    new_kovi::new_kovi,
-    new_plugin::new_plugin,
-    update::update,
-};
+use cmd::add::{add, add_to};
+use cmd::new_kovi::new_kovi;
+use cmd::new_plugin::new_plugin;
+use cmd::update::update;
 
 mod cmd;
 mod locales;
@@ -52,6 +50,16 @@ enum KoviCommands {
 
         #[arg(short, long, help = "Non guided approach")]
         simple: bool,
+
+        #[arg(
+            long,
+            value_parser = ["milky", "onebot"],
+            help = "Driver/Protocol to use (milky or onebot). Prompts interactively if not set."
+        )]
+        driver: Option<String>,
+
+        #[arg(long, help = "Add kovi-plugin-cmd with the selected driver feature")]
+        cmd: bool,
     },
 
     #[command(
@@ -78,7 +86,12 @@ fn main() {
             simple,
             prefix,
         } => new_plugin(name, simple, prefix),
-        KoviCommands::New { name, simple } => new_kovi(name, simple),
+        KoviCommands::New {
+            name,
+            simple,
+            driver,
+            cmd,
+        } => new_kovi(name, simple, driver, cmd),
         KoviCommands::Add { name, package } => match package {
             Some(package) => add_to(name, package),
             None => add(name),
