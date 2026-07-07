@@ -125,7 +125,7 @@ pub fn cargo_new_kovi(name: &str, driver: DriverKind, is_add_cmd_plugin: bool) {
 
     let cargo_path = path.join("Cargo.toml");
 
-    let version = match get_latest_version("kovi") {
+    let kovi_version = match get_latest_version("kovi") {
         Ok(v) => v,
         Err(e) => {
             let v = KOVI_DEFAULT_VERSION.to_string();
@@ -138,12 +138,18 @@ pub fn cargo_new_kovi(name: &str, driver: DriverKind, is_add_cmd_plugin: bool) {
 
     let driver_crate = driver_crate_name(driver);
 
+    let driver_version = match get_latest_version(driver_crate) {
+        Ok(v) => v,
+        Err(_) => kovi_version.clone(),
+    };
+
     // 读取已有 Cargo.toml，追加依赖和 workspace
     let mut cargo_content =
         std::fs::read_to_string(&cargo_path).expect("Failed to read Cargo.toml");
 
+    // 用 workspace = true 引用依赖，版本号只写在 [workspace.dependencies] 中
     cargo_content.push_str(&format!(
-        "\nkovi = \"{version}\"\n{driver_crate} = \"{version}\"\n\n[workspace]\n\n[workspace.dependencies]\nkovi = \"{version}\"\n{driver_crate} = \"{version}\"\n"
+        "\nkovi.workspace = true\n{driver_crate}.workspace = true\n\n[workspace]\n\n[workspace.dependencies]\nkovi = \"{kovi_version}\"\n{driver_crate} = \"{driver_version}\"\n"
     ));
 
     std::fs::write(&cargo_path, &cargo_content).expect("Failed to write Cargo.toml");
